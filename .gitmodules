@@ -1,0 +1,3 @@
+[submodule "mrubyc"]
+	path = mrubyc
+	url = https://github.com/uist1idrju3i/mrubyc
