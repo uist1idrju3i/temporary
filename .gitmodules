@@ -1,0 +1,9 @@
+[submodule "mrubyc"]
+	path = mrubyc
+	url = https://github.com/uist1idrju3i/mrubyc/
+[submodule "mruby"]
+	path = mruby
+	url = https://github.com/mruby/mruby
+[submodule "emsdk"]
+	path = emsdk
+	url = https://github.com/emscripten-core/emsdk/

@@ -1,0 +1,5 @@
+.DS_Store
+*.zip
+checksums-sha256.txt
+/build/
+mruby_build_config.rb.lock

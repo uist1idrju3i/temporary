@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mruby/c WebAssembly Sample</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>mruby/c WebAssembly Sample</h1>
+        <p>Compile Ruby 4.0 code with mrbc.js, then run it with mrubyc.js in your browser.</p>
+      </header>
+
+      <section class="panel">
+        <label for="ruby-code">Ruby code</label>
+        <textarea id="ruby-code" spellcheck="false">puts "Hello from mruby/c!"
+puts 1 + 2
+</textarea>
+        <button id="run-button" type="button">Compile and Run</button>
+        <p id="status" role="status">Loading WebAssembly modules...</p>
+      </section>
+
+      <section class="panel">
+        <label for="output">Output</label>
+        <textarea id="output" readonly spellcheck="false"></textarea>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
