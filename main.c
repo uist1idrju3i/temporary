@@ -8,6 +8,7 @@
  */
 #include <stdint.h>
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "mrubyc.h"
 
 #include "led0_blink_bytecode.c"
@@ -35,6 +36,15 @@
  * Instead, the runtime receives this fixed-size buffer during initialization.
  */
 static uint8_t memory_pool[MRBC_MEMORY_SIZE];
+
+#if defined(__AVR_AVR128DB48__) && !defined(MRBC_NO_TIMER)
+#define AVR128DB_MRBC_TIMER_PRESCALER 64u
+#define AVR128DB_MRBC_TIMER_COUNTS ((F_CPU / AVR128DB_MRBC_TIMER_PRESCALER) * MRBC_TICK_UNIT / 1000u)
+
+#if AVR128DB_MRBC_TIMER_COUNTS == 0 || AVR128DB_MRBC_TIMER_COUNTS > 65536u
+#error "MRBC_TICK_UNIT cannot be generated with the AVR128DB TCA0 timer settings."
+#endif
+#endif
 
 #if defined(__AVR_AVR128DB48__)
 #define CLOCK_STARTUP_TIMEOUT 65535u
@@ -79,6 +89,29 @@ static void clock_init(void)
 }
 #elif defined(__AVR_ATmega128__)
 static void clock_init(void)
+{
+}
+#endif
+
+#if defined(__AVR_AVR128DB48__) && !defined(MRBC_NO_TIMER)
+static void timer_init(void)
+{
+  TCA0.SINGLE.CTRLA = 0;
+  TCA0.SINGLE.CTRLB = TCA_SINGLE_WGMODE_NORMAL_gc;
+  TCA0.SINGLE.CNT = 0;
+  TCA0.SINGLE.PER = (uint16_t)(AVR128DB_MRBC_TIMER_COUNTS - 1u);
+  TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
+  TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
+  TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV64_gc | TCA_SINGLE_ENABLE_bm;
+}
+
+ISR(TCA0_OVF_vect)
+{
+  TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
+  mrbc_tick();
+}
+#else
+static void timer_init(void)
 {
 }
 #endif
@@ -262,6 +295,7 @@ int main(void)
   clock_init();
   led0_init();
   mrbc_init(memory_pool, MRBC_MEMORY_SIZE);
+  timer_init();
   define_led0_class();
 
   if( mrbc_create_task(mrbbuf, 0) != NULL ) {

@@ -10,6 +10,10 @@ DEVICE ?= AVR128DB48
 F_CPU ?= 16000000UL
 MRBC_MEMORY_SIZE ?= 8192
 MRBC_TICK_UNIT ?= MRBC_TICK_UNIT_10_MS
+MRBC_TIMER_CPPFLAGS := -DMRBC_NO_TIMER
+ifeq ($(DEVICE),AVR128DB48)
+MRBC_TIMER_CPPFLAGS :=
+endif
 RUBY_PATH_PREFIX ?= /opt/homebrew/opt/ruby/bin:/opt/homebrew/bin
 RUBY ?= ruby
 MRBC ?= mrbc
@@ -20,7 +24,7 @@ DFP_DIR ?= /Applications/microchip/mplabx/v6.30/packs/Microchip/AVR-Dx_DFP/2.7.3
 PATH_WITH_HOMEBREW_RUBY = PATH="$(RUBY_PATH_PREFIX):$$PATH"
 
 COMMON_FLAGS := -mcpu=$(DEVICE) -mdfp="$(DFP_DIR)/xc8" -O1 -mcall-prologues -ffunction-sections -fdata-sections -fshort-enums -fno-common -funsigned-char -funsigned-bitfields -Wall -mconst-data-in-progmem -mconst-data-in-config-mapped-progmem
-CPPFLAGS := -DF_CPU=$(F_CPU) -DNDEBUG -DMRBC_NO_TIMER -DMRBC_TICK_UNIT=$(MRBC_TICK_UNIT) -DMRBC_MEMORY_SIZE=$(MRBC_MEMORY_SIZE) -DMRBC_USE_FLOAT=0 -DMRBC_USE_MATH=0 -DMRBC_USE_STRING=0 -DMRBC_SYMBOL_SEARCH_LINEAR -DMRBC_INSTANCE_DESTRUCTOR=0 -DMRBC_NO_STDIO -I. -I$(BUILD_DIR) -I$(AUTOGEN_DIR) -I$(MRUBYC_DIR)/src -I$(MRUBYC_DIR)/hal/avr
+CPPFLAGS := -DF_CPU=$(F_CPU) -DNDEBUG $(MRBC_TIMER_CPPFLAGS) -DMRBC_TICK_UNIT=$(MRBC_TICK_UNIT) -DMRBC_MEMORY_SIZE=$(MRBC_MEMORY_SIZE) -DMRBC_USE_FLOAT=0 -DMRBC_USE_MATH=0 -DMRBC_USE_STRING=0 -DMRBC_SYMBOL_SEARCH_LINEAR -DMRBC_INSTANCE_DESTRUCTOR=0 -DMRBC_NO_STDIO -I. -I$(BUILD_DIR) -I$(AUTOGEN_DIR) -I$(MRUBYC_DIR)/src -I$(MRUBYC_DIR)/hal/avr
 CFLAGS := $(COMMON_FLAGS) $(CPPFLAGS)
 LDFLAGS := -mcpu=$(DEVICE) -mdfp="$(DFP_DIR)/xc8" -Wl,-Map=$(MAP) -Wl,--gc-sections -Wl,--memorysummary,$(BUILD_DIR)/memoryfile.xml
 LDLIBS := -Wl,--start-group -Wl,-lm -Wl,--end-group
