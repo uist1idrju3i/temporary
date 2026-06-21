@@ -12,6 +12,10 @@
 
 #include "led0_blink_bytecode.c"
 
+#if !defined(__AVR_AVR128DB48__) && !defined(__AVR_ATmega128__)
+#error "Unsupported AVR device. This sample supports AVR128DB48 and ATmega128."
+#endif
+
 /**
  * @def MRBC_MEMORY_SIZE
  * @brief Size of the static memory pool passed to the mruby/c runtime.
@@ -32,6 +36,21 @@
  */
 static uint8_t memory_pool[MRBC_MEMORY_SIZE];
 
+#if defined(__AVR_AVR128DB48__)
+#define CLOCK_STARTUP_TIMEOUT 65535u
+
+static uint8_t wait_clock_status(uint8_t mask)
+{
+  uint16_t timeout = CLOCK_STARTUP_TIMEOUT;
+
+  while( (CLKCTRL.MCLKSTATUS & mask) == 0 ) {
+    if( timeout == 0 ) return 0;
+    timeout--;
+  }
+
+  return 1;
+}
+
 /**
  * @brief Configure the main clock source for the application.
  * @details
@@ -44,17 +63,25 @@ static uint8_t memory_pool[MRBC_MEMORY_SIZE];
  */
 static void clock_init(void)
 {
+  _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0);
+  _PROTECTED_WRITE(CLKCTRL.OSCHFCTRLA, CLKCTRL_FRQSEL_16M_gc);
+  (void)wait_clock_status(CLKCTRL_OSCHFS_bm);
+
   _PROTECTED_WRITE(CLKCTRL.XOSCHFCTRLA,
                    CLKCTRL_ENABLE_bm |
                    CLKCTRL_SELHF_XTAL_gc |
                    CLKCTRL_FRQRANGE_16M_gc |
                    CLKCTRL_CSUTHF_4K_gc);
 
-  while( (CLKCTRL.MCLKSTATUS & CLKCTRL_EXTS_bm) == 0 ) {
+  if( wait_clock_status(CLKCTRL_EXTS_bm) ) {
+    _PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_EXTCLK_gc);
   }
-
-  _PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_EXTCLK_gc);
 }
+#elif defined(__AVR_ATmega128__)
+static void clock_init(void)
+{
+}
+#endif
 
 /**
  * @brief Initialize the board LED0 GPIO.
@@ -65,8 +92,13 @@ static void clock_init(void)
  */
 static void led0_init(void)
 {
+#if defined(__AVR_AVR128DB48__)
   PORTB.OUTSET = PIN3_bm;
   PORTB.DIRSET = PIN3_bm;
+#elif defined(__AVR_ATmega128__)
+  PORTB |= _BV(PB3);
+  DDRB |= _BV(PB3);
+#endif
 }
 
 /**
@@ -77,7 +109,11 @@ static void led0_init(void)
  */
 static void led0_on(void)
 {
+#if defined(__AVR_AVR128DB48__)
   PORTB.OUTCLR = PIN3_bm;
+#elif defined(__AVR_ATmega128__)
+  PORTB &= (uint8_t)~_BV(PB3);
+#endif
 }
 
 /**
@@ -88,7 +124,11 @@ static void led0_on(void)
  */
 static void led0_off(void)
 {
+#if defined(__AVR_AVR128DB48__)
   PORTB.OUTSET = PIN3_bm;
+#elif defined(__AVR_ATmega128__)
+  PORTB |= _BV(PB3);
+#endif
 }
 
 /**
@@ -99,7 +139,11 @@ static void led0_off(void)
  */
 static void led0_toggle(void)
 {
+#if defined(__AVR_AVR128DB48__)
   PORTB.OUTTGL = PIN3_bm;
+#elif defined(__AVR_ATmega128__)
+  PORTB ^= _BV(PB3);
+#endif
 }
 
 /**
@@ -112,7 +156,11 @@ static void led0_toggle(void)
  */
 static int led0_is_on(void)
 {
+#if defined(__AVR_AVR128DB48__)
   return (PORTB.OUT & PIN3_bm) == 0;
+#elif defined(__AVR_ATmega128__)
+  return (PORTB & _BV(PB3)) == 0;
+#endif
 }
 
 /**
