@@ -77,7 +77,7 @@ mrbc -Bheartbeat_mrb --remove-lv -o src/heartbeat_mrb.h src/heartbeat.rb
 ```sh
 # native_sim（推奨。タイマーはほぼ実時間どおり）
 west build -b native_sim/native mrubyc-ncs-sample -- -DCONFIG_GPIO_EMUL=y
-./build/zephyr/zephyr.exe
+./build/mrubyc-ncs-sample/zephyr/zephyr.exe
 
 # QEMU（起動とタスク動作は確認できるが、タイマーが実時間より速く進む）
 west build -b qemu_cortex_m3 mrubyc-ncs-sample -t run
