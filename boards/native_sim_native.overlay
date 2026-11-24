@@ -1,0 +1,33 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Map four pins of the existing gpio-emul controller to led0..led3 so the
+ * sample can run on native_sim/native without nRF54L15-DK hardware.
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	leds {
+		compatible = "gpio-leds";
+		led_0: led_0 {
+			gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+		};
+		led_1: led_1 {
+			gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+		};
+		led_2: led_2 {
+			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+		};
+		led_3: led_3 {
+			gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	aliases {
+		led0 = &led_0;
+		led1 = &led_1;
+		led2 = &led_2;
+		led3 = &led_3;
+	};
+};
