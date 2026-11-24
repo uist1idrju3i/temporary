@@ -85,7 +85,7 @@ west build -b qemu_cortex_m3 mrubyc-ncs-sample -t run
 
 ## 検証状況
 
-NCS v3.4.2 での `nrf54l15dk/nrf54l15/cpuapp` 向けビルドと、QEMU・native_sim での 2 タスクの動作は確認済みです。nRF54L15-DK の実機では、本リポジトリでは試していません。
+NCS v3.4.2 での `nrf54l15dk/nrf54l15/cpuapp` 向けビルドと、QEMU・native_sim での 2 タスクの動作は確認済みです。nRF54L15-DK の実機でも、LED0 の点滅と 1 秒ごとの heartbeat 出力を確認済みです。
 
 ## ライセンス
 
